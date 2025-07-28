@@ -1,4 +1,4 @@
-import { getProjectById, getProjects, postProject } from "../controllers/ProjectController.js";
+import { getProjectById, getProjects, postProject } from "../controllers/Controller.js";
 import express from 'express';
 const router= express.Router();
 router.post('/projects',postProject)
