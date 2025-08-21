@@ -69,8 +69,10 @@ app.get('/',(req,res)=>{
 })
 
 
+
+app.use('/api',router);
+
+
 app.listen(PORT,()=>{
     console.log(`server is running on port ${PORT} `);
 })
-
-app.use('/api',router);
