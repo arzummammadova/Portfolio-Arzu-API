@@ -40,7 +40,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     const schema = Joi.object({
         name: Joi.string().min(2).max(50).required(),
         email: Joi.string().email().required(),
-        message: Joi.string().min(5).max(500).required()
+        message: Joi.string().min(3).max(500).required()
     });
 
     const { error, value } = schema.validate(req.body, { abortEarly: false });
