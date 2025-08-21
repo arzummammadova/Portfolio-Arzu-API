@@ -4,6 +4,7 @@ import './src/db/ConnectDB.js'
 import router from './src/routes/ProjectRouter.js'; 
 import cors from 'cors';
 import nodemailer from 'nodemailer';
+import Joi from 'joi';
 
 const app=express();
 
@@ -29,41 +30,55 @@ const transporter = nodemailer.createTransport({
     },
 });
 app.post('/api/contact', async (req, res) => {
-    // Destructure form data from the request body
-    const { name, email, message } = req.body;
+    const schema = Joi.object({
+        name: Joi.string().min(2).max(50).required().messages({
+            "string.empty": "Name is required",
+            "string.min": "Name should have at least 2 characters",
+            "string.max": "Name should not exceed 50 characters"
+        }),
+        email: Joi.string().email().required().messages({
+            "string.empty": "Email is required",
+            "string.email": "Invalid email format"
+        }),
+        message: Joi.string().min(5).max(500).required().messages({
+            "string.empty": "Message is required",
+            "string.min": "Message should be at least 5 characters",
+            "string.max": "Message should not exceed 500 characters"
+        })
+    });
 
-    // Server-side validation: Check if all required fields are present.
-    // This provides a final layer of validation beyond client-side checks.
-    if (!name || !email || !message) {
-        return res.status(400).json({ message: 'All fields (name, email, message) are required.' });
+    // Validate request body
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        // bütün errorları array şəklində göndərək
+        return res.status(400).json({
+            message: "Validation error",
+            errors: error.details.map(err => err.message)
+        });
     }
 
-    // Define the email content and recipient details.
+    const { name, email, message } = value;
+
     const mailOptions = {
-        from: process.env.EMAIL_USER, // Sender's email address (your email)
-        to: process.env.EMAIL_USER,   // Recipient's email address (the email where you want to receive messages)
-                                      // You can change this to a different email if desired.
-        subject: `New Contact Message from ${name}`, // Subject line for the email
-        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`, // Plain text version of the email body
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
+        subject: `New Contact Message from ${name}`,
+        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
         html: `<p><strong>Name:</strong> ${name}</p>
                <p><strong>Email:</strong> ${email}</p>
-               <p><strong>Message:</strong> ${message}</p>`, // HTML version of the email body (for rich text)
+               <p><strong>Message:</strong> ${message}</p>`,
     };
 
     try {
-        // Attempt to send the email using the configured transporter.
         await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully!'); // Log success to the console
-        // Send a success response back to the frontend
+        console.log('Email sent successfully!');
         res.status(200).json({ message: 'Message sent successfully!' });
     } catch (error) {
-        // If an error occurs during email sending (e.g., incorrect credentials, network issues)
-        console.error('Error sending email:', error); // Log the detailed error
-        // Send an error response back to the frontend
+        console.error('Error sending email:', error);
         res.status(500).json({ message: 'Failed to send message. Please try again later.' });
     }
 });
-
 app.get('/',(req,res)=>{
     res.send('hello world');
 })
