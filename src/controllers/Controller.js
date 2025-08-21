@@ -3,32 +3,32 @@
 import Project from "../models/projectModels.js";
 
 
-export const postProject = async (req, res) => {
-    try {
-        const { title, description, image, githubLink, liveLink, figmaLink, technologies, video } = req.body;
+// export const postProject = async (req, res) => {
+//     try {
+//         const { title, description, image, githubLink, liveLink, figmaLink, technologies, video } = req.body;
 
-        if (!title || !description || !image || !githubLink || !technologies) {
-            return res.status(400).json({ message: "All fields are required except liveLink, figmaLink, and video." });
-        }
+//         if (!title || !description || !image || !githubLink || !technologies) {
+//             return res.status(400).json({ message: "All fields are required except liveLink, figmaLink, and video." });
+//         }
 
-        const newProject = new Project({
-            title,
-            description,
-            image,
-            githubLink,
-            liveLink,
-            figmaLink,
-            technologies,
-            video
-        });
+//         const newProject = new Project({
+//             title,
+//             description,
+//             image,
+//             githubLink,
+//             liveLink,
+//             figmaLink,
+//             technologies,
+//             video
+//         });
 
-        await newProject.save();
-        res.status(201).json({ message: "Project created successfully", project: newProject });
-    } catch (error) {
-        console.error("Error creating project:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-}
+//         await newProject.save();
+//         res.status(201).json({ message: "Project created successfully", project: newProject });
+//     } catch (error) {
+//         console.error("Error creating project:", error);
+//         res.status(500).json({ message: "Internal server error" });
+//     }
+// }
 
 export const getProjects= async (req, res) => {
     try {
