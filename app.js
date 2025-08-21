@@ -24,7 +24,7 @@ app.use(cors({
 app.use(express.json());
 const contactLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 dəqiqə
-  max: 3,
+  max: 2,
   message: { message: "Too many requests from this IP, please try again later." }
 });
 
