@@ -36,7 +36,6 @@ const transporter = nodemailer.createTransport({
     },
 });
 app.post('/api/contact', contactLimiter, async (req, res) => {
-    // 2) Joi ilə validation
     const schema = Joi.object({
         name: Joi.string().min(2).max(50).required(),
         email: Joi.string().email().required(),
@@ -44,19 +43,23 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     });
 
     const { error, value } = schema.validate(req.body, { abortEarly: false });
+
     if (error) {
+        // Daha oxunaqlı format
+        const formattedErrors = {};
+        error.details.forEach(err => {
+            const field = err.path[0]; // name, email, message
+            formattedErrors[field] = err.message;
+        });
+
         return res.status(400).json({
             message: "Validation error",
-            errors: error.details.map(err => err.message)
+            errors: formattedErrors
         });
     }
 
     const { name, email, message } = value;
 
-    // 3) (İstəyə görə) Email əsaslı limit də burda əlavə edə bilərik
-    // məsələn DB-də "son göndərilən vaxt" saxlanıla bilər.
-
-    // Nodemailer ilə göndərmə
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_USER,
@@ -75,6 +78,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
         res.status(500).json({ message: 'Failed to send message' });
     }
 });
+
 app.get('/',(req,res)=>{
     res.send('hello world');
 })
